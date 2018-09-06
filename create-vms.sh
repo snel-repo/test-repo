@@ -1,7 +1,7 @@
 #! /bin/bash
 
-SERVER_NAME=S1
-NUM_TPU=$2
+SERVER_NAME=$1
+NUM_TPU=($2)
 BUCKET_DIR=$3
 ZONE=$4
 
