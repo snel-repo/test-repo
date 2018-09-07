@@ -37,6 +37,8 @@ hash -r
 pip install --upgrade google-cloud-storage
 pip install --upgrade pymongo
 pip install future
+mkdir /${BUCKET_NAME} 
+chmod 777 /${BUCKET_NAME} 
 mkdir /data; mkdir -p /code/lfadslite; mkdir -p /code/PBT_HP_opt;
 gsutil -m cp -r ${CODE_BUCKET}/code/lfadslite /code/
 gsutil -m cp -r  ${CODE_BUCKET}/code/PBT_HP_opt /code/
@@ -56,12 +58,11 @@ gcloud compute ssh ${SERVER_NAME} --zone=us-central1-f --command='sudo mongo adm
    authorization: enabled
 net: 
    bindIp: 127.0.0.1,`hostname -I`" | sudo tee -a /etc/mongod.conf && sudo systemctl restart mongod.service' &&
-echo "Mounting the bucket" &&
-gcloud compute ssh ${SERVER_NAME} --zone=us-central1-f --command="mkdir /${BUCKET_NAME} && chmod 777 /${BUCKET_NAME} 
-echo '${BUCKET_NAME} /${BUCKET_NAME} gcsfuse rw,auto,user' | sudo tee -a /etc/fstab
+echo "Mounting the bucket" ;
+gcloud compute ssh ${SERVER_NAME} --zone=us-central1-f --command="echo '${BUCKET_NAME} /${BUCKET_NAME} gcsfuse rw,auto,user' | sudo tee -a /etc/fstab
 mount /${BUCKET_NAME}
 mkdir /${BUCKET_NAME}/data
-mkdir /${BUCKET_NAME}/runs" &&
+mkdir /${BUCKET_NAME}/runs" ;
 ind=1 &&
 tpu_node_counter=0 &&
 TPU_RANGE_LIST=$(gcloud beta compute tpus list --zone=${ZONE} --format='value(RANGE)') &&
@@ -74,4 +75,4 @@ do
         tpu_node_counter=$((tpu_node_counter+1))
     fi
     ind=$((ind+1))
-done
+done 
