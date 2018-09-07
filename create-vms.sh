@@ -14,7 +14,6 @@ gcloud config set compute/zone ${ZONE}
 # create a bucket
 gsutil mb gs://${BUCKET_NAME}
 
-
 gcloud compute instances create ${SERVER_NAME} --machine-type=n1-standard-4 --boot-disk-size=200GB --image-project=ml-images --image-family=tf-${TF_VERSION} --zone=${ZONE} --scopes=cloud-platform  --tags=server-tag --metadata startup-script="#! /bin/bash
 gcloud config set compute/zone ${ZONE}
 apt-get install dirmngr
@@ -46,29 +45,26 @@ apt-get update
 apt-get install -y gcsfuse
 echo HOSTNAME=${SERVER_NAME} >> /etc/environment
 echo MONGOSERVER=${SERVER_NAME} >> /etc/environment
-echo PYTHONPATH=/code/lfadslite:/code/PBT_HP_opt/pbt_opt:$PYTHONPATH >> /etc/environment"
-echo "Wait for the Server VM to become ready..."
+echo PYTHONPATH=/code/lfadslite:/code/PBT_HP_opt/pbt_opt:$PYTHONPATH >> /etc/environment" &&
+echo "Wait for the Server VM to become ready..."  &&
 until gcloud compute ssh ${SERVER_NAME} --command="cat /etc/environment" | grep -q "lfadslite"; do
   sleep 10
-done
-echo "Finished Creating the Server VMM."
-echo "Adding a Mongo user"
+done &&
+echo "Finished Creating the Server VMM." &&
+echo "Adding a Mongo user" &&
 gcloud compute ssh ${SERVER_NAME} --zone=us-central1-f --command='sudo mongo admin --host 127.0.0.1:27017 --eval "db.createUser({user: \"pbt_user\", pwd: \"pbt0Pass\", roles: [ { role: \"userAdminAnyDatabase\", db: \"admin\" }]});db.grantRolesToUser(\"pbt_user\", [{ role: \"readWriteAnyDatabase\", db: \"admin\" }]);" && sudo sed -i "/bindIp/d" /etc/mongod.conf && echo "security:
    authorization: enabled
 net: 
-   bindIp: 127.0.0.1,`hostname -I`" | sudo tee -a /etc/mongod.conf && sudo systemctl restart mongod.service'
-echo "Mounting the bucket"
-gcloud compute ssh ${SERVER_NAME} --zone=us-central1-f --command="mkdir /${BUCKET_NAME} && chmod 777 /${BUCKET_NAME}
+   bindIp: 127.0.0.1,`hostname -I`" | sudo tee -a /etc/mongod.conf && sudo systemctl restart mongod.service' &&
+echo "Mounting the bucket" &&
+gcloud compute ssh ${SERVER_NAME} --zone=us-central1-f --command="mkdir /${BUCKET_NAME} && chmod 777 /${BUCKET_NAME} 
 echo '${BUCKET_NAME} /${BUCKET_NAME} gcsfuse rw,auto,user' | sudo tee -a /etc/fstab
 mount /${BUCKET_NAME}
 mkdir /${BUCKET_NAME}/data
-mkdir /${BUCKET_NAME}/runs"
-
-#create TPU nodes
-ind=1
-tpu_node_counter=0
-TPU_RANGE_LIST=$(gcloud beta compute tpus list --zone=${ZONE} --format='value(RANGE)')
-
+mkdir /${BUCKET_NAME}/runs" &&
+ind=1 &&
+tpu_node_counter=0 &&
+TPU_RANGE_LIST=$(gcloud beta compute tpus list --zone=${ZONE} --format='value(RANGE)') &&
 while [ $tpu_node_counter -lt $NUM_TPU ]
 do
     ip_range=10.240.${ind}.0/29
