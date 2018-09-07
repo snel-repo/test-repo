@@ -4,10 +4,10 @@ SERVER_NAME=$1
 NUM_TPU=($2)
 BUCKET_NAME=$3
 ZONE=$4
-CODE_BUCKET='pbt-test-bucket-2'
+CODE_BUCKET='gs://pbt-test-bucket-2'
 TF_VERSION='nightly'
 
-# create TPUs
+echo "Started creating TPUs. This usually takes several minutes to complete! Patience is a virtue... :)"
 ind=1 &&
 tpu_node_counter=0 &&
 TPU_RANGE_LIST=$(gcloud beta compute tpus list --zone=${ZONE} --format='value(RANGE)') &&
@@ -48,7 +48,7 @@ pip install --upgrade pymongo
 pip install future
 mkdir /${BUCKET_NAME} 
 chmod 777 /${BUCKET_NAME} 
-mkdir /data; mkdir -p /code/lfadslite; mkdir -p /code/PBT_HP_opt;
+mkdir /data; mkdir /code
 gsutil -m cp -r ${CODE_BUCKET}/code/lfadslite /code/
 gsutil -m cp -r  ${CODE_BUCKET}/code/PBT_HP_opt /code/
 # install GCS fuse
@@ -56,6 +56,7 @@ apt-get update
 apt-get install -y gcsfuse
 echo HOSTNAME=${SERVER_NAME} >> /etc/environment
 echo MONGOSERVER=${SERVER_NAME} >> /etc/environment
+echo TPU_NAME=tpu-${SERVER_NAME}-0 >> /etc/environment
 echo PYTHONPATH=/code/lfadslite:/code/PBT_HP_opt/pbt_opt:$PYTHONPATH >> /etc/environment" &&
 echo "Wait for the Server VM to become ready..."  &&
 until gcloud compute ssh ${SERVER_NAME} --command="cat /etc/environment" | grep -q "lfadslite"; do
