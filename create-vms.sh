@@ -49,6 +49,7 @@ pip install future
 mkdir /${BUCKET_NAME} 
 chmod 777 /${BUCKET_NAME} 
 mkdir /data; mkdir /code
+gsutil -m cp -r ${BUCKET_DIR}/data/* /data/
 gsutil -m cp -r ${CODE_BUCKET}/code/lfadslite /code/
 gsutil -m cp -r  ${CODE_BUCKET}/code/PBT_HP_opt /code/
 # install GCS fuse
