@@ -5,7 +5,8 @@ NUM_TPU=($2)
 BUCKET_NAME=$3
 ZONE=$4
 CODE_BUCKET='gs://pbt-test-bucket-2'
-TF_VERSION='1.11'
+TF_VERSION='1-11'
+TF_VERSION_TPU='1.11'
 
 echo "Started creating TPUs. This usually takes several minutes to complete! Patience is a virtue... :)"
 ind=1 &&
@@ -16,7 +17,7 @@ do
     ip_range=10.240.${ind}.0/29
     if ! echo $TPU_RANGE_LIST | grep -q $ip_range; then
         echo $ip_range
-        gcloud compute tpus create tpu-${SERVER_NAME}-${tpu_node_counter} --range ${ip_range} --zone ${ZONE} --version ${TF_VERSION} --network default &
+        gcloud compute tpus create tpu-${SERVER_NAME}-${tpu_node_counter} --range ${ip_range} --zone ${ZONE} --version ${TF_VERSION_TPU} --network default &
         tpu_node_counter=$((tpu_node_counter+1))
     fi
     ind=$((ind+1))
